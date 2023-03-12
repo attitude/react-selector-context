@@ -1,0 +1,20 @@
+{
+  "name": "web",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "echo \"TODO\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/attitude/react-selector-context.git",
+    "directory": "apps/web"
+  },
+  "dependencies": {
+    "react-selector-context": "workspace:*"
+  }
+}

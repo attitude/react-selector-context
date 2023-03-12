@@ -1,0 +1,49 @@
+{
+  "name": "react-selector-context",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Tiny selector library for React Context to fix unnecessary re-renders",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "typings": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/",
+    "src/",
+    "README.md"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "pnpm run clean && tsc --build",
+    "test": "echo \"TODO\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/attitude/react-selector-context.git",
+    "directory": "packages/react-selector-context"
+  },
+  "keywords": [
+    "react",
+    "selector",
+    "context"
+  ],
+  "author": {
+    "name": "Martin Adamko",
+    "url": "https://github.com/attitude"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/attitude/react-selector-context/issues"
+  },
+  "homepage": "https://github.com/attitude/react-selector-context#readme",
+  "peerDependencies": {
+    "react": "^17 || ^18"
+  }
+}

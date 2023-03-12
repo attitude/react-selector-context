@@ -1,0 +1,2 @@
+- pnpm config set "git-tag-version" "false"
+- npm version from-git --git-tag-version false
