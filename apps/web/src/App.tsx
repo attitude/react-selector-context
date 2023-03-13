@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import './App.css'
-import { AppSelectorContextProvider, NormalCounter, OtherNormalCounter, OtherSelectorCounter, SelectorCounter } from './Components'
+import { AppSelectorContext, NormalCounter, OtherNormalCounter, OtherSelectorCounter, SelectorCounter } from './Components'
 import { AppContext } from './Context'
 
 function hrefToRepository({ href, hostname, pathname }: Location) {
@@ -33,14 +33,17 @@ export function App() {
 
   return (
     <main className="vertical-stack box-padding">
-      <h1>React Context with Selectors</h1>
+      <header className="vertical-stack gap">
+        <h1>React Context with Selectors</h1>
+        <a href={hrefToRepository(window.location)}>GitHub repository &rarr;</a>
 
-      <p>
-        When React context changes all components consuming such context need to re-render.
-        It is expected behavior but that causes endless nesting of context providers to
-        achieve update granularity and re-render only the parts of our application
-        that really need to re-render.
-      </p>
+        <p>
+          When React context changes all components consuming such context need to re-render.
+          It is expected behavior but that causes endless nesting of context providers to
+          achieve update granularity and re-render only the parts of our application
+          that really need to re-render.
+        </p>
+      </header>
 
       <p>
         <strong>This is an example of a typical context usage. Try to increase any of the counters,
@@ -83,10 +86,10 @@ export function App() {
       <p>Context: <code>{JSON.stringify({ counter, otherCounter })}</code></p>
 
       <div className="vertical-stack gap">
-        <AppSelectorContextProvider value={value}>
+        <AppSelectorContext.Provider value={value}>
           <SelectorCounter />
           <OtherSelectorCounter />
-        </AppSelectorContextProvider>
+        </AppSelectorContext.Provider>
       </div>
 
       <p>
@@ -101,8 +104,12 @@ export function App() {
         </strong>
       </p>
 
-      <a className="horizontal-stack justify-center padding border border-radius"
-        href={`${hrefToRepository(window.location)}/blob/main/apps/web/src/Components/SelectorCounters.tsx`}>Show me the code!</a>
+      <footer className="vertical-stack gap">
+        <a className="horizontal-stack justify-center padding border border-radius"
+          href={`${hrefToRepository(window.location)}/blob/main/apps/web/src/Components/SelectorCounters.tsx`}>Show me the code!</a>
+
+        <a className="align-center" href={hrefToRepository(window.location)}>GitHub repository &rarr;</a>
+      </footer>
     </main>
   )
 }

@@ -2,6 +2,12 @@
 
 Tiny selector library for React Context to fix unnecessary re-renders
 
+## Installation
+
+- `npm add react-selector-context`
+- `yarn add react-selector-context`
+- `pnpm add react-selector-context`
+
 ## Usage
 
 1. Wrap existing React context with `createSelectorContext(yourContext)`
@@ -81,4 +87,4 @@ export default App() {
 }
 ```
 
-[See the full example app &rarr;](apps/web/src/Components/SelectorCounters.tsx)
+[See the full example &rarr;](apps/web/src/Components/SelectorCounters.tsx)

@@ -4,14 +4,14 @@ import {
 	memo,
 	MutableRefObject,
 	NamedExoticComponent,
-	ProviderProps,
+	ReactNode,
 	useCallback, useContext,
 	useEffect,
 	useMemo,
 	useRef,
 	useState,
 } from 'react'
-import type { Selector, UseSelectorContextHook } from './Types'
+import type { ConsumerProps, ProviderProps, Selector, UseSelectorContextHook } from './Types'
 
 type Callback<Result> = (next: Result) => void
 type Register<Store> = <Result>(selector: Selector<Store, Result>, callback: Callback<Result>) => void
@@ -23,7 +23,7 @@ type SelectorContextType<Store> = {
 	unregister: Unregister;
 }
 
-type Watchers<Store, Result> = Map<Callback<Result>, Selector<Store, Result>>
+type Subscriptions<Store, Result> = Map<Callback<Result>, Selector<Store, Result>>
 
 /**
  * Wraps original context in a stable one that supports selectors
@@ -31,47 +31,49 @@ type Watchers<Store, Result> = Map<Callback<Result>, Selector<Store, Result>>
  * @param context Original context being wrapped
  * @returns Tuple of new provider component and hook to use selector context
  */
-export function createSelectorContext<Store>(context: Context<Store>): readonly [NamedExoticComponent<ProviderProps<Store>>, UseSelectorContextHook<Store>] {
+export function createSelectorContext<Store>(context: Context<Store>): readonly [{
+	Consumer: (props: ConsumerProps<Store>) => ReactNode;
+	Provider: NamedExoticComponent<ProviderProps<Store>>;
+}, UseSelectorContextHook<Store>] {
 	const displayName = context.displayName ?? 'Context'
 
-	const SelectorContext = createContext<SelectorContextType<Store>>(null as unknown as SelectorContextType<Store>)
-	SelectorContext.displayName = `SelectorContext(${displayName})`
+	const Subscriptions = createContext<SelectorContextType<Store>>(null as unknown as SelectorContextType<Store>)
+	Subscriptions.displayName = `${displayName}(Subscriptions)`
 
 	const Provider = memo<ProviderProps<Store>>(({ children, value }) => {
 		const ref = useRef(value); ref.current = value
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const watchers = useRef<Watchers<Store, any>>(new Map)
+		const subscriptions = useRef<Subscriptions<Store, any>>(new Map)
 
 		useEffect(() => {
-			watchers.current.forEach(
+			subscriptions.current.forEach(
 				(selector, callback) => {
-					const next = selector(value)
-					callback(next)
+					callback(selector(value))
 				},
 			)
 		}, [value])
 
 		return (
-			<SelectorContext.Provider value={useMemo(() => ({
+			<Subscriptions.Provider value={useMemo(() => ({
 				ref,
 				register: (selector, callback) => {
-					watchers.current.set(callback, selector)
+					subscriptions.current.set(callback, selector)
 				},
 				unregister: (callback) => {
-					watchers.current.delete(callback)
+					subscriptions.current.delete(callback)
 				},
 			}), [])}>
 				{children}
-			</SelectorContext.Provider>
+			</Subscriptions.Provider>
 		)
 	})
-	Provider.displayName = `SelectorContext(${displayName})`
+	Provider.displayName = `SelectorContext(${displayName}.Provider)`
 
 	const useSelectorContext: UseSelectorContextHook<Store> = (
 		selector,
 		equal = Object.is,
 	) => {
-		const { ref, register, unregister } = useContext(SelectorContext)
+		const { ref, register, unregister } = useContext(Subscriptions)
 
 		const [previous, setPrevious] = useState(selector(ref.current))
 		const previousRef = useRef(previous); previousRef.current = previous
@@ -94,5 +96,17 @@ export function createSelectorContext<Store>(context: Context<Store>): readonly 
 		return previous
 	}
 
-	return [Provider, useSelectorContext] as const
+	const Consumer = ({
+		children,
+		selector,
+		when = Object.is,
+	}: ConsumerProps<Store>) => {
+		return children(useSelectorContext(selector, when)) ?? null
+	}
+	Consumer.displayName = `SelectorContext(${displayName}.Consumer)`
+
+	return [{
+		Consumer,
+		Provider,
+	}, useSelectorContext] as const
 }

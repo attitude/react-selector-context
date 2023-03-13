@@ -6,7 +6,7 @@ import { CounterUI } from './CounterUI'
 
 // 2. Wrap the context
 // IMPORTANT: Do not forget to add the Provider somewhere at the root of your application.
-export const [AppSelectorContextProvider, useSelectorContext] = createSelectorContext(AppContext)
+export const [AppSelectorContext, useSelectorContext] = createSelectorContext(AppContext)
 
 // 3. Selector for counter value and its setter action:
 const selectCounter = (context: AppContextType) => ({
