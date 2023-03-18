@@ -37,34 +37,45 @@ export function createSelectorContext<Store>(context: Context<Store>): readonly 
 }, UseSelectorContextHook<Store>] {
 	const displayName = context.displayName ?? 'Context'
 
-	const Subscriptions = createContext<SelectorContextType<Store>>(null as unknown as SelectorContextType<Store>)
-	Subscriptions.displayName = `${displayName}(Subscriptions)`
+	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+	const SelectorSubscriptions = createContext<SelectorContextType<Store>>(null!)
+	SelectorSubscriptions.displayName = `${displayName}(Subscriptions)`
 
 	const Provider = memo<ProviderProps<Store>>(({ children, value }) => {
 		const ref = useRef(value); ref.current = value
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const subscriptions = useRef<Subscriptions<Store, any>>(new Map)
+		const selectorSubscriptions = useRef<Subscriptions<Store, any>>(new Map)
 
 		useEffect(() => {
-			subscriptions.current.forEach(
+			selectorSubscriptions.current.forEach(
 				(selector, callback) => {
 					callback(selector(value))
 				},
 			)
 		}, [value])
 
+		useEffect(() => {
+			const currentSelectorSubscriptions = selectorSubscriptions.current
+
+			return () => {
+				currentSelectorSubscriptions.forEach((_, callback) => {
+					currentSelectorSubscriptions.delete(callback)
+				})
+			}
+		}, [])
+
 		return (
-			<Subscriptions.Provider value={useMemo(() => ({
+			<SelectorSubscriptions.Provider value={useMemo(() => ({
 				ref,
 				register: (selector, callback) => {
-					subscriptions.current.set(callback, selector)
+					selectorSubscriptions.current.set(callback, selector)
 				},
 				unregister: (callback) => {
-					subscriptions.current.delete(callback)
+					selectorSubscriptions.current.delete(callback)
 				},
 			}), [])}>
 				{children}
-			</Subscriptions.Provider>
+			</SelectorSubscriptions.Provider>
 		)
 	})
 	Provider.displayName = `SelectorContext(${displayName}.Provider)`
@@ -73,7 +84,7 @@ export function createSelectorContext<Store>(context: Context<Store>): readonly 
 		selector,
 		equal = Object.is,
 	) => {
-		const { ref, register, unregister } = useContext(Subscriptions)
+		const { ref, register, unregister } = useContext(SelectorSubscriptions)
 
 		const [previous, setPrevious] = useState(selector(ref.current))
 		const previousRef = useRef(previous); previousRef.current = previous
@@ -99,9 +110,9 @@ export function createSelectorContext<Store>(context: Context<Store>): readonly 
 	const Consumer = ({
 		children,
 		selector,
-		when = Object.is,
+		equal = Object.is,
 	}: ConsumerProps<Store>) => {
-		return children(useSelectorContext(selector, when)) ?? null
+		return children(useSelectorContext(selector, equal)) ?? null
 	}
 	Consumer.displayName = `SelectorContext(${displayName}.Consumer)`
 
