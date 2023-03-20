@@ -30,7 +30,11 @@ const selectOtherCounter = (context: AppContextType) => ({
 //
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function customEqual(before: any, after: any) {
-  return JSON.stringify(before) === JSON.stringify(after)
+  try {
+    return JSON.stringify(before) === JSON.stringify(after)
+  } catch (e) {
+    return false
+  }
 }
 
 // 6a. Final UI components:

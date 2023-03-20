@@ -30,7 +30,7 @@ const Counters = createContext<CountersStore>({
 })
 
 // Step 1:
-export const [Provider, useSelectorContext] = createSelectorContext(Context)
+export const [Provider, useSelectorContext] = createSelectorContext(Counters)
 
 const selectCounter = (context: CountersStore) => context.counter
 const selectOtherCounter = (context: CountersStore) => context.otherCounter

@@ -26,10 +26,26 @@ type SelectorContextType<Store> = {
 type Subscriptions<Store, Result> = Map<Callback<Result>, Selector<Store, Result>>
 
 /**
- * Wraps original context in a stable one that supports selectors
+ * Wraps a context in a stable context with selector support.
  *
- * @param context Original context being wrapped
- * @returns Tuple of new provider component and hook to use selector context
+ * @param context Original context to wrap
+ * @returns A tuple containing the new context and a hook to use the context
+ * @example
+ * const [SelectorContext, useSelectorContext] = createSelectorContext(React.createContext({}))
+ * const store = { foo: 'bar' }
+ * const selector = (store) => store.foo
+ *
+ * const Component = () => {
+ * 	const foo = useSelectorContext(selector)
+ * 	return <div>{foo}</div>
+ * }
+ *
+ * ReactDOM.render(
+ * 	<SelectorContext.Provider value={store}>
+ * 		<Component />
+ * 	</SelectorContext.Provider>,
+ * 	document.getElementById('root'),
+ * )
  */
 export function createSelectorContext<Store>(context: Context<Store>): readonly [{
 	Consumer: (props: ConsumerProps<Store>) => ReactNode;
@@ -41,6 +57,27 @@ export function createSelectorContext<Store>(context: Context<Store>): readonly 
 	const SelectorSubscriptions = createContext<SelectorContextType<Store>>(null!)
 	SelectorSubscriptions.displayName = `${displayName}(Subscriptions)`
 
+	/**
+	 * Provider component that re-renders all consumers whenever the store changes.
+	 * @param props Provider props
+	 * @returns Provider component
+	 * @example
+	 * const [SelectorContext, useSelectorContext] = createSelectorContext(React.createContext({}))
+	 * const store = { foo: 'bar' }
+	 * const selector = (store) => store.foo
+	 *
+	 * const Component = () => {
+	 *  const foo = useSelectorContext(selector)
+	 * 	return <div>{foo}</div>
+	 * }
+	 *
+	 * ReactDOM.render(
+	 * 	<SelectorContext.Provider value={store}>
+	 * 		<Component />
+	 * 	</SelectorContext.Provider>,
+	 * 	document.getElementById('root'),
+	 * )
+	 */
 	const Provider = memo<ProviderProps<Store>>(({ children, value }) => {
 		const ref = useRef(value); ref.current = value
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,6 +117,29 @@ export function createSelectorContext<Store>(context: Context<Store>): readonly 
 	})
 	Provider.displayName = `SelectorContext(${displayName}.Provider)`
 
+	/**
+	 * Returns a hook that returns the value of the selector, and re-renders the component whenever the value of the selector changes.
+	 *
+	 * @param selector Function to select a value from the store.
+	 * @param equal Function to test whether two objects are equal. Defaults to Object.is.
+	 * @returns The value of the selector.
+	 * @example
+	 * const [SelectorContext, useSelectorContext] = createSelectorContext(React.createContext({}))
+	 * const store = { foo: 'bar' }
+	 * const selector = (store) => store.foo
+	 *
+	 * const Component = () => {
+	 *  const foo = useSelectorContext(selector)
+	 * 	return <div>{foo}</div>
+	 * }
+	 *
+	 * ReactDOM.render(
+	 * 	<SelectorContext.Provider value={store}>
+	 * 		<Component />
+	 * 	</SelectorContext.Provider>,
+	 * 	document.getElementById('root'),
+	 * )
+	 */
 	const useSelectorContext: UseSelectorContextHook<Store> = (
 		selector,
 		equal = Object.is,
@@ -107,6 +167,30 @@ export function createSelectorContext<Store>(context: Context<Store>): readonly 
 		return previous
 	}
 
+	/**
+	 * Returns a component that renders its children with the value of the selector, and re-renders the component whenever the value of the selector changes.
+	 * @param props Consumer props
+	 * @returns Consumer component
+	 * @example
+	 * const [SelectorContext, useSelectorContext] = createSelectorContext(React.createContext({}))
+	 * const store = { foo: 'bar' }
+	 * const selector = (store) => store.foo
+	 *
+	 * const Component = () => {
+	 * 	return (
+	 * 		<SelectorContext.Consumer selector={selector}>
+	 * 			{(foo) => <div>{foo}</div>}
+	 * 		</SelectorContext.Consumer>
+	 * 	)
+	 * }
+	 *
+	 * ReactDOM.render(
+	 * 	<SelectorContext.Provider value={store}>
+	 * 		<Component />
+	 * 	</SelectorContext.Provider>,
+	 * 	document.getElementById('root'),
+	 * )
+	 */
 	const Consumer = ({
 		children,
 		selector,
