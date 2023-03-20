@@ -1,6 +1,41 @@
 # react-selector-context
 
 Tiny selector library for React Context to fix unnecessary re-renders
+by adding selector support to React Context.
+
+Selectors are functions that take the current state of the context and return
+a specific piece of data. They are similar to mapStateToProps in Redux,
+but they are not tied to Redux.
+
+## How does createSelectorContext work?
+
+`createSelectorContext()` takes a React context and returns:
+
+1. a new Provider component;
+2. useSelectorContext hook that supports selectors;
+3. and Consumer component.
+
+The `Provider` component is a standard React context provider, with one difference:
+it wraps its children in a new context that exposes subscribe and unsubscribe API.
+Whenever the value prop changes it then calls its subscribed selector with an updated
+values.
+
+The `useSelectorContext()` hook is a function that takes a selector function
+and returns the selected value. Whenever the selected value changes,
+the component using this hook will re-render, returning the newly selected value.
+
+## Benefits over the React Context
+
+1. You can avoid passing down props to multiple levels of components as with
+   a classic React Context, but you can use selectors to select only the data you need
+   from the context and use it in any component that needs it.
+2. You can optimize the performance of your components by using the equal parameter
+   in the useSelectorContext hook. This parameter allows you to specify
+   a custom equality function to compare the previous and current values of the selected data.
+   This means that the component will only re-render if the selected data has changed.
+3. You can decouple your components from the context.
+   By using selectors, your components don't need to know about the structure of the context.
+   They only need to know what data they need and how to select it.
 
 ## Installation
 
